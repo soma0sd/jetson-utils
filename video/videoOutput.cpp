@@ -88,7 +88,7 @@ videoOutput* videoOutput::Create( const videoOptions& options )
 	{
 		output = glDisplay::Create(options);
 	}
-	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	// soma0sd modification: CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
 	else if( uri.protocol == "intervideo" )
 	{
 		output = gstEncoder::Create(options);

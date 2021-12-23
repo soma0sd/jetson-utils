@@ -264,7 +264,7 @@ bool gstEncoder::buildLaunchStr()
 	
 	// determine the requested protocol to use
 	const URI& uri = GetResource();
-	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	// soma0sd modification: CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
 	if( uri.protocol != "intervideo" )  	
 	{	
 	#if GST_CHECK_VERSION(1,0,0)
@@ -390,7 +390,7 @@ bool gstEncoder::buildLaunchStr()
 
 		mOptions.deviceType = videoOptions::DEVICE_IP;
 	}
-	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	// soma0sd modification: CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
 	else if( uri.protocol == "intervideo" )
 	{
 		ss << "videoconvert ! intervideosink channel=v";

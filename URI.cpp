@@ -95,7 +95,7 @@ bool URI::Parse( const char* uri )
 		{
 			protocol = "display";
 		}
-		// CNVS project modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+		// soma0sd modification: CNVS project modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
 		else if( protocol == "intervideo" )
 		{
 			if( sscanf(location.c_str(), "%i", &port) != 1 )

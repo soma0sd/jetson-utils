@@ -255,7 +255,7 @@ const char* videoOptions::DeviceTypeToStr( videoOptions::DeviceType type )
 		case DEVICE_IP:		return "ip";
 		case DEVICE_FILE:		return "file";
 		case DEVICE_DISPLAY:	return "display";
-		case DEVICE_INTERVIDEO:	return "intervideo";  // CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol
+		case DEVICE_INTERVIDEO:	return "intervideo";  // soma0sd modification: CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol
 	}
 	return nullptr;
 }
