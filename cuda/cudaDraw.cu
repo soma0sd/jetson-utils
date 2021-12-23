@@ -104,6 +104,67 @@ cudaError_t cudaDrawCircle( void* input, void* output, size_t width, size_t heig
 	return cudaGetLastError();
 }
 
+//----------------------------------------------------------------------------
+// Eclipse Drawing
+// soma0sd modification
+//----------------------------------------------------------------------------
+inline __device__ float ellipseEquation(float x, float y, float cx, float cy, float xAxis, float yAxis)
+{
+	const float xTerm = (x - cx) * (x - cx) / (xAxis * xAxis);
+	const float yTerm = (y - cy) * (y - cy) / (yAxis * yAxis);
+	return xTerm + yTerm;
+}
+
+template<typename T>
+__global__ void gpuDrawEclipse( T* img, int imgWidth, int imgHeight, int offset_x, int offset_y, int cx, int cy, float xAxis, float yAxis, const float4 color )
+{
+	const int x = blockIdx.x * blockDim.x + threadIdx.x + offset_x;
+	const int y = blockIdx.y * blockDim.y + threadIdx.y + offset_y;
+	const int ax = ceilf(xAxis * 0.5f);
+	const int ay = ceilf(yAxis * 0.5f);
+	if( x >= imgWidth || y >= imgHeight || x < 0 || y < 0 )
+		return;
+	if( ellipseEquation(x, y, cx, cy, ax, ay) <= 1.0 )
+	{
+		const int idx = y * imgWidth + x;
+		img[idx] = cudaAlphaBlend(img[idx], color);
+	}
+}
+// cudaDrawEclipse
+cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t height, imageFormat format, int cx, int cy, int xAxis, int yAxis, const float4& color )
+{
+	if( !input || !output || width == 0 || height == 0 || xAxis <= 0 || yAxis <= 0)
+		return cudaErrorInvalidValue;
+	// if the input and output images are different, copy the input to the output
+	if( input != output )
+		CUDA(cudaMemcpy(output, input, imageFormatSize(format, width, height), cudaMemcpyDeviceToDevice));
+	const int offset_x = ceilf(cx - (xAxis * 0.5f));
+	const int offset_y = ceilf(cy - (yAxis * 0.5f));
+
+	// launch kernel
+	const dim3 blockDim(8, 8);
+	const dim3 gridDim(iDivUp(xAxis,blockDim.x), iDivUp(yAxis,blockDim.y));
+	#define LAUNCH_DRAW_ECLIPSE(type) \
+		gpuDrawEclipse<type><<<gridDim, blockDim>>>((type*)output, width, height, offset_x, offset_y, cx, cy, xAxis, yAxis, color)
+	
+	if( format == IMAGE_RGB8 )
+		LAUNCH_DRAW_ECLIPSE(uchar3);
+	else if( format == IMAGE_RGBA8 )
+		LAUNCH_DRAW_ECLIPSE(uchar4);
+	else if( format == IMAGE_RGB32F )
+		LAUNCH_DRAW_ECLIPSE(float3); 
+	else if( format == IMAGE_RGBA32F )
+		LAUNCH_DRAW_ECLIPSE(float4);
+	else
+	{
+		imageFormatErrorMsg(LOG_CUDA, "cudaDrawEclipse()", format);
+		return cudaErrorInvalidValue;
+	}
+		
+	return cudaGetLastError();
+}
+
+
 
 //----------------------------------------------------------------------------
 // Line drawing (find if the distance to the line <= line_width)

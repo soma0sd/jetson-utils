@@ -1410,6 +1410,73 @@ PyObject* PyCUDA_DrawCircle( PyObject* self, PyObject* args, PyObject* kwds )
 	Py_RETURN_NONE;
 }
 
+// soma0sd modification
+// PyCUDA_DrawEclipse
+PyObject* PyCUDA_DrawEclipse( PyObject* self, PyObject* args, PyObject* kwds )
+{
+	// parse arguments
+	PyObject* pyInput  = NULL;
+	PyObject* pyOutput = NULL;
+	PyObject* pyColor  = NULL;
+	
+	float x = 0.0f;
+	float y = 0.0f;
+	float xAxis = 0.0f;
+	float yAxis = 0.0f;
+	
+	static char* kwlist[] = {"input", "center", "axis", "color", "output", NULL};
+
+	if( !PyArg_ParseTupleAndKeywords(args, kwds, "O(ff)(ff)O|O", kwlist, &pyInput, &x, &y, &xAxis, &yAxis, &pyColor, &pyOutput))
+	{
+		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawEclipse() failed to parse arguments");
+		return NULL;
+	}
+	
+	if( !pyOutput )
+		pyOutput = pyInput;
+	
+	// get pointers to image data
+	PyCudaImage* input = PyCUDA_GetImage(pyInput);
+	PyCudaImage* output = PyCUDA_GetImage(pyOutput);
+
+	if( !input || !output )
+	{
+		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "failed to get input/output CUDA image pointers (should be cudaImage)");
+		return NULL;
+	}
+
+	if( input->width != output->width || input->height != output->height || input->format != output->format )
+	{
+		PyErr_SetString(PyExc_TypeError, LOG_PY_UTILS "input/output images need to have matching dimensions and formats");
+		return NULL;
+	}	
+	
+	// parse the color
+	float4 color = make_float4(0, 0, 0, 255);
+	
+	if( !PyTuple_Check(pyColor) )
+	{
+		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "color argument isn't a valid tuple");
+		return NULL;
+	}
+
+	if( !PyArg_ParseTuple(pyColor, "fff|f", &color.x, &color.y, &color.z, &color.w) )
+	{
+		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "failed to parse color tuple");
+		return NULL;
+	}
+
+	// run the CUDA function
+	if( CUDA_FAILED(cudaDrawEclipse(input->base.ptr, output->base.ptr, input->width, input->height, input->format, 
+							 x, y, xAxis, yAxis, color)) )
+	{
+		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawEclipse() failed to render");
+		return NULL;
+	}
+
+	Py_RETURN_NONE;
+}
+
 
 // PyCUDA_DrawLine
 PyObject* PyCUDA_DrawLine( PyObject* self, PyObject* args, PyObject* kwds )
@@ -1896,6 +1963,7 @@ static PyMethodDef pyCUDA_Functions[] =
 	{ "cudaNormalize", (PyCFunction)PyCUDA_Normalize, METH_VARARGS|METH_KEYWORDS, "Normalize the pixel intensities of an image between two ranges" },
 	{ "cudaOverlay", (PyCFunction)PyCUDA_Overlay, METH_VARARGS|METH_KEYWORDS, "Overlay the input image onto the composite output image at position (x,y)" },
 	{ "cudaDrawCircle", (PyCFunction)PyCUDA_DrawCircle, METH_VARARGS|METH_KEYWORDS, "Draw a circle with the specified radius and color centered at position (x,y)" },
+	{ "cudaDrawEclipse", (PyCFunction)PyCUDA_DrawEclipse, METH_VARARGS|METH_KEYWORDS, "Draw a exlipse with color centered at position (x,y) and (axisX, axisY)" },
 	{ "cudaDrawLine", (PyCFunction)PyCUDA_DrawLine, METH_VARARGS|METH_KEYWORDS, "Draw a line with the specified color and line width from (x1,y1) to (x2,y2)" },
 	{ "cudaDrawRect", (PyCFunction)PyCUDA_DrawRect, METH_VARARGS|METH_KEYWORDS, "Draw a rect with the specified color at (left, top, right, bottom)" },
 	{ "adaptFontSize", (PyCFunction)PyCUDA_AdaptFontSize, METH_VARARGS, "Determine an appropriate font size for the given image dimension" },

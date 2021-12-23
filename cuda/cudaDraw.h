@@ -67,6 +67,47 @@ cudaError_t cudaDrawCircle( T* image, size_t width, size_t height,
 	return cudaDrawCircle(image, width, height, imageFormatFromType<T>(), cx, cy, radius, color); 
 }
 
+/**
+ * cudaDrawEclipse
+ * @ingroup drawing
+ *
+ * soma0sd modification
+ */
+cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t height, imageFormat format, 
+					   int cx, int cy, int xAxis, int yAxis, const float4& color );
+	
+/**
+ * cudaDrawEclipse
+ * @ingroup drawing
+ */
+template<typename T> 
+cudaError_t cudaDrawEclipse( T* input, T* output, size_t width, size_t height, 
+				 	   int cx, int cy, int xAxis, int yAxis, const float4& color )	
+{ 
+	return cudaDrawEclipse(input, output, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color); 
+}	
+
+/**
+ * cudaDrawEclipse (in-place)
+ * @ingroup drawing
+ */
+cudaError_t cudaDrawEclipse( void* image, size_t width, size_t height, imageFormat format, 
+					   int cx, int cy, int xAxis, int yAxis, const float4& color )
+{
+	return cudaDrawEclipse(image, image, width, height, format, cx, cy, xAxis, yAxis, color);
+}
+
+/**
+ * cudaDrawEclipse (in-place)
+ * @ingroup drawing
+ */
+template<typename T> 
+cudaError_t cudaDrawEclipse( T* image, size_t width, size_t height, 
+				 	   int cx, int cy, int xAxis, int yAxis, const float4& color )	
+{ 
+	return cudaDrawCircle(image, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color); 
+}
+
 
 /**
  * cudaDrawLine
