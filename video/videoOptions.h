@@ -121,7 +121,8 @@ public:
 		DEVICE_CSI,			/**< MIPI CSI camera */
 		DEVICE_IP,			/**< IP-based network stream (e.g. RTP/RTSP) */
 		DEVICE_FILE,			/**< Disk-based stream from a file or directory of files */
-		DEVICE_DISPLAY			/**< OpenGL output stream rendered to an attached display */
+		DEVICE_DISPLAY,			/**< OpenGL output stream rendered to an attached display */
+		DEVICE_INTERVIDEO	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol
 	};
 
 	/**

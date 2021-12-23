@@ -264,39 +264,42 @@ bool gstEncoder::buildLaunchStr()
 	
 	// determine the requested protocol to use
 	const URI& uri = GetResource();
+	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	if( uri.protocol != "intervideo" )  	
+	{	
+	#if GST_CHECK_VERSION(1,0,0)
+		//ss << mCapsStr << " ! ";
 
-#if GST_CHECK_VERSION(1,0,0)
-	//ss << mCapsStr << " ! ";
-
-	if( mOptions.codec == videoOptions::CODEC_H264 )
-		ss << "omxh264enc bitrate=" << mOptions.bitRate << " ! video/x-h264 !  ";	// TODO:  investigate quality-level setting
-	else if( mOptions.codec == videoOptions::CODEC_H265 )
-		ss << "omxh265enc bitrate=" << mOptions.bitRate << " ! video/x-h265 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_VP8 )
-		ss << "omxvp8enc bitrate=" << mOptions.bitRate << " ! video/x-vp8 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_VP9 )
-		ss << "omxvp9enc bitrate=" << mOptions.bitRate << " ! video/x-vp9 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_MJPEG )
-		ss << "nvjpegenc ! image/jpeg ! ";
-#else
-	if( mOptions.codec == videoOptions::CODEC_H264 )
-		ss << "nv_omx_h264enc quality-level=2 ! video/x-h264 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_H265 )
-		ss << "nv_omx_h265enc quality-level=2 ! video/x-h265 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_VP8 )
-		ss << "nv_omx_vp8enc quality-level=2 ! video/x-vp8 ! ";
-	else if( mOptions.codec == videoOptions::CODEC_VP9 )
-		ss << "nv_omx_vp9enc quality-level=2 ! video/x-vp9 ! ";
-#endif
-	else
-	{
-		LogError(LOG_GSTREAMER "gstEncoder -- unsupported codec requested (%s)\n", videoOptions::CodecToStr(mOptions.codec));
-		LogError(LOG_GSTREAMER "              supported encoder codecs are:\n");
-		LogError(LOG_GSTREAMER "                 * h264\n");
-		LogError(LOG_GSTREAMER "                 * h265\n");
-		LogError(LOG_GSTREAMER "                 * vp8\n");
-		LogError(LOG_GSTREAMER "                 * vp9\n");
-		LogError(LOG_GSTREAMER "                 * mjpeg\n");
+		if( mOptions.codec == videoOptions::CODEC_H264 )
+			ss << "omxh264enc bitrate=" << mOptions.bitRate << " ! video/x-h264 !  ";	// TODO:  investigate quality-level setting
+		else if( mOptions.codec == videoOptions::CODEC_H265 )
+			ss << "omxh265enc bitrate=" << mOptions.bitRate << " ! video/x-h265 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_VP8 )
+			ss << "omxvp8enc bitrate=" << mOptions.bitRate << " ! video/x-vp8 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_VP9 )
+			ss << "omxvp9enc bitrate=" << mOptions.bitRate << " ! video/x-vp9 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_MJPEG )
+			ss << "nvjpegenc ! image/jpeg ! ";
+	#else
+		if( mOptions.codec == videoOptions::CODEC_H264 )
+			ss << "nv_omx_h264enc quality-level=2 ! video/x-h264 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_H265 )
+			ss << "nv_omx_h265enc quality-level=2 ! video/x-h265 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_VP8 )
+			ss << "nv_omx_vp8enc quality-level=2 ! video/x-vp8 ! ";
+		else if( mOptions.codec == videoOptions::CODEC_VP9 )
+			ss << "nv_omx_vp9enc quality-level=2 ! video/x-vp9 ! ";
+	#endif
+		else
+		{
+			LogError(LOG_GSTREAMER "gstEncoder -- unsupported codec requested (%s)\n", videoOptions::CodecToStr(mOptions.codec));
+			LogError(LOG_GSTREAMER "              supported encoder codecs are:\n");
+			LogError(LOG_GSTREAMER "                 * h264\n");
+			LogError(LOG_GSTREAMER "                 * h265\n");
+			LogError(LOG_GSTREAMER "                 * vp8\n");
+			LogError(LOG_GSTREAMER "                 * vp9\n");
+			LogError(LOG_GSTREAMER "                 * mjpeg\n");
+		}
 	}
 
 	//if( fileLen > 0 && ipLen > 0 )
@@ -387,6 +390,15 @@ bool gstEncoder::buildLaunchStr()
 
 		mOptions.deviceType = videoOptions::DEVICE_IP;
 	}
+	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	else if( uri.protocol == "intervideo" )
+	{
+		ss << "videoconvert ! intervideosink channel=v";
+		ss << uri.port;
+
+		mOptions.deviceType = videoOptions::DEVICE_INTERVIDEO;
+	}
+	// ... intervideosink output protocol 
 
 	mLaunchStr = ss.str();
 

@@ -95,6 +95,16 @@ bool URI::Parse( const char* uri )
 		{
 			protocol = "display";
 		}
+		// CNVS project modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+		else if( protocol == "intervideo" )
+		{
+			if( sscanf(location.c_str(), "%i", &port) != 1 )
+			{
+				LogVerbose("URI -- using default intervideo port 0\n");
+				port = 0;
+			}
+		}
+		// ... intervideosink output protocol
 		else
 		{
 			LogError("URI -- invalid resource or file path:  %s\n", string.c_str());

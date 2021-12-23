@@ -88,6 +88,12 @@ videoOutput* videoOutput::Create( const videoOptions& options )
 	{
 		output = glDisplay::Create(options);
 	}
+	// CNVS project	modification (Mikhail K. lich.mk@gmail.com ): intervideosink output protocol ...
+	else if( uri.protocol == "intervideo" )
+	{
+		output = gstEncoder::Create(options);
+	}	
+	// ... intervideosink output protocol 
 	else
 	{
 		LogError(LOG_VIDEO "videoOutput -- unsupported protocol (%s)\n", uri.protocol.size() > 0 ? uri.protocol.c_str() : "null");
