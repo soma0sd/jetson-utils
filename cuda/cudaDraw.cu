@@ -116,22 +116,24 @@ inline __device__ float ellipseEquation(float x, float y, float cx, float cy, fl
 }
 
 template<typename T>
-__global__ void gpuDrawEclipse( T* img, int imgWidth, int imgHeight, int offset_x, int offset_y, int cx, int cy, float xAxis, float yAxis, const float4 color )
+__global__ void gpuDrawEclipse( T* img, int imgWidth, int imgHeight, int offset_x, int offset_y, int cx, int cy, float xAxis, float yAxis, int lineWidth, const float4 color )
 {
 	const int x = blockIdx.x * blockDim.x + threadIdx.x + offset_x;
 	const int y = blockIdx.y * blockDim.y + threadIdx.y + offset_y;
 	const int ax = ceilf(xAxis * 0.5f);
 	const int ay = ceilf(yAxis * 0.5f);
+	const int ix = ax - lineWidth;
+	const int iy = ay - lineWidth;
 	if( x >= imgWidth || y >= imgHeight || x < 0 || y < 0 )
 		return;
-	if( ellipseEquation(x, y, cx, cy, ax, ay) <= 1.0 )
+	if( ellipseEquation(x, y, cx, cy, ax, ay) <= 1.0 && (lineWidth <=0 || ellipseEquation(x, y, cx, cy, ix, iy) >= 1.0) )
 	{
 		const int idx = y * imgWidth + x;
 		img[idx] = cudaAlphaBlend(img[idx], color);
 	}
 }
 // cudaDrawEclipse
-cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t height, imageFormat format, int cx, int cy, int xAxis, int yAxis, const float4& color )
+cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t height, imageFormat format, int cx, int cy, int xAxis, int yAxis, const float4& color, int lineWidth)
 {
 	if( !input || !output || width == 0 || height == 0 || xAxis <= 0 || yAxis <= 0)
 		return cudaErrorInvalidValue;
@@ -145,7 +147,7 @@ cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t hei
 	const dim3 blockDim(8, 8);
 	const dim3 gridDim(iDivUp(xAxis,blockDim.x), iDivUp(yAxis,blockDim.y));
 	#define LAUNCH_DRAW_ECLIPSE(type) \
-		gpuDrawEclipse<type><<<gridDim, blockDim>>>((type*)output, width, height, offset_x, offset_y, cx, cy, xAxis, yAxis, color)
+		gpuDrawEclipse<type><<<gridDim, blockDim>>>((type*)output, width, height, offset_x, offset_y, cx, cy, xAxis, yAxis, lineWidth, color)
 	
 	if( format == IMAGE_RGB8 )
 		LAUNCH_DRAW_ECLIPSE(uchar3);
@@ -249,7 +251,7 @@ cudaError_t cudaDrawLine( void* input, void* output, size_t width, size_t height
 // Rect drawing (a grid of threads is launched over the rect)
 //----------------------------------------------------------------------------
 template<typename T>
-__global__ void gpuDrawRect( T* img, int imgWidth, int imgHeight, int x0, int y0, int boxWidth, int boxHeight, const float4 color ) 
+__global__ void gpuDrawRect( T* img, int imgWidth, int imgHeight, int x0, int y0, int boxWidth, int boxHeight, int lineWidth, const float4 color ) 
 {
 	const int box_x = blockIdx.x * blockDim.x + threadIdx.x;
 	const int box_y = blockIdx.y * blockDim.y + threadIdx.y;
@@ -259,17 +261,24 @@ __global__ void gpuDrawRect( T* img, int imgWidth, int imgHeight, int x0, int y0
 
 	const int x = box_x + x0;
 	const int y = box_y + y0;
+	const int ix = x0 + lineWidth;
+	const int iy = y0 + lineWidth;
+	const int fx = x0 + boxWidth - lineWidth;
+	const int fy = y0 + boxHeight - lineWidth;
 
 	if( x >= imgWidth || y >= imgHeight || x < 0 || y < 0 )
 		return;
 
 	const int idx = y * imgWidth + x;
-	img[idx] = cudaAlphaBlend(img[idx], color);
+	if(lineWidth <=0 || x < ix || y < iy || x > fx || y > fy)
+	{
+		img[idx] = cudaAlphaBlend(img[idx], color);
+	}
 }
 
 
 // cudaDrawRect
-cudaError_t cudaDrawRect( void* input, void* output, size_t width, size_t height, imageFormat format, int left, int top, int right, int bottom, const float4& color )
+cudaError_t cudaDrawRect( void* input, void* output, size_t width, size_t height, imageFormat format, int left, int top, int right, int bottom, const float4& color, int lineWidth )
 {
 	if( !input || !output || width == 0 || height == 0 )
 		return cudaErrorInvalidValue;
@@ -308,7 +317,7 @@ cudaError_t cudaDrawRect( void* input, void* output, size_t width, size_t height
 	const dim3 gridDim(iDivUp(boxWidth,blockDim.x), iDivUp(boxHeight,blockDim.y));
 			
 	#define LAUNCH_DRAW_RECT(type) \
-		gpuDrawRect<type><<<gridDim, blockDim>>>((type*)output, width, height, left, top, boxWidth, boxHeight, color)
+		gpuDrawRect<type><<<gridDim, blockDim>>>((type*)output, width, height, left, top, boxWidth, boxHeight, lineWidth, color)
 	
 	if( format == IMAGE_RGB8 )
 		LAUNCH_DRAW_RECT(uchar3);

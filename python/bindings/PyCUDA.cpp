@@ -1423,10 +1423,11 @@ PyObject* PyCUDA_DrawEclipse( PyObject* self, PyObject* args, PyObject* kwds )
 	float y = 0.0f;
 	float xAxis = 0.0f;
 	float yAxis = 0.0f;
+	float lineWidth = 0;
 	
-	static char* kwlist[] = {"input", "center", "axis", "color", "output", NULL};
+	static char* kwlist[] = {"input", "center", "axis", "color", "line_width","output", NULL};
 
-	if( !PyArg_ParseTupleAndKeywords(args, kwds, "O(ff)(ff)O|O", kwlist, &pyInput, &x, &y, &xAxis, &yAxis, &pyColor, &pyOutput))
+	if( !PyArg_ParseTupleAndKeywords(args, kwds, "O(ff)(ff)O|fO", kwlist, &pyInput, &x, &y, &xAxis, &yAxis, &pyColor, &lineWidth, &pyOutput))
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawEclipse() failed to parse arguments");
 		return NULL;
@@ -1468,7 +1469,7 @@ PyObject* PyCUDA_DrawEclipse( PyObject* self, PyObject* args, PyObject* kwds )
 
 	// run the CUDA function
 	if( CUDA_FAILED(cudaDrawEclipse(input->base.ptr, output->base.ptr, input->width, input->height, input->format, 
-							 x, y, xAxis, yAxis, color)) )
+							 x, y, xAxis, yAxis, color, lineWidth)) )
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawEclipse() failed to render");
 		return NULL;
@@ -1559,10 +1560,11 @@ PyObject* PyCUDA_DrawRect( PyObject* self, PyObject* args, PyObject* kwds )
 	float top = 0.0f;
 	float right = 0.0f;
 	float bottom = 0.0f;
+	float lineWidth = 0;
 
-	static char* kwlist[] = {"input", "rect", "color", "output", NULL};
+	static char* kwlist[] = {"input", "rect", "color", "line_width", "output", NULL};
 
-	if( !PyArg_ParseTupleAndKeywords(args, kwds, "O(ffff)O|O", kwlist, &pyInput, &left, &top, &right, &bottom, &pyColor, &pyOutput))
+	if( !PyArg_ParseTupleAndKeywords(args, kwds, "O(ffff)O|fO", kwlist, &pyInput, &left, &top, &right, &bottom, &pyColor, &lineWidth, &pyOutput))
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawRect() failed to parse arguments");
 		return NULL;
@@ -1604,7 +1606,7 @@ PyObject* PyCUDA_DrawRect( PyObject* self, PyObject* args, PyObject* kwds )
 
 	// run the CUDA function
 	if( CUDA_FAILED(cudaDrawRect(input->base.ptr, output->base.ptr, input->width, input->height, input->format,
-						    left, top, right, bottom, color)) )
+						    left, top, right, bottom, color, lineWidth)) )
 	{
 		PyErr_SetString(PyExc_Exception, LOG_PY_UTILS "cudaDrawRect() failed to render");
 		return NULL;

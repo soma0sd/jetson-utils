@@ -74,7 +74,7 @@ cudaError_t cudaDrawCircle( T* image, size_t width, size_t height,
  * soma0sd modification
  */
 cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t height, imageFormat format, 
-					   int cx, int cy, int xAxis, int yAxis, const float4& color );
+					   int cx, int cy, int xAxis, int yAxis, const float4& color, int lineWidth );
 	
 /**
  * cudaDrawEclipse
@@ -82,9 +82,9 @@ cudaError_t cudaDrawEclipse( void* input, void* output, size_t width, size_t hei
  */
 template<typename T> 
 cudaError_t cudaDrawEclipse( T* input, T* output, size_t width, size_t height, 
-				 	   int cx, int cy, int xAxis, int yAxis, const float4& color )	
+				 	   int cx, int cy, int xAxis, int yAxis, const float4& color, int lineWidth )	
 { 
-	return cudaDrawEclipse(input, output, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color); 
+	return cudaDrawEclipse(input, output, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color, lineWidth); 
 }	
 
 /**
@@ -92,9 +92,9 @@ cudaError_t cudaDrawEclipse( T* input, T* output, size_t width, size_t height,
  * @ingroup drawing
  */
 cudaError_t cudaDrawEclipse( void* image, size_t width, size_t height, imageFormat format, 
-					   int cx, int cy, int xAxis, int yAxis, const float4& color )
+					   int cx, int cy, int xAxis, int yAxis, const float4& color, int lineWidth )
 {
-	return cudaDrawEclipse(image, image, width, height, format, cx, cy, xAxis, yAxis, color);
+	return cudaDrawEclipse(image, image, width, height, format, cx, cy, xAxis, yAxis, color, lineWidth);
 }
 
 /**
@@ -103,9 +103,9 @@ cudaError_t cudaDrawEclipse( void* image, size_t width, size_t height, imageForm
  */
 template<typename T> 
 cudaError_t cudaDrawEclipse( T* image, size_t width, size_t height, 
-				 	   int cx, int cy, int xAxis, int yAxis, const float4& color )	
+				 	   int cx, int cy, int xAxis, int yAxis, const float4& color, int lineWidth )	
 { 
-	return cudaDrawCircle(image, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color); 
+	return cudaDrawCircle(image, width, height, imageFormatFromType<T>(), cx, cy, xAxis, yAxis, color, lineWidth); 
 }
 
 
@@ -154,7 +154,7 @@ cudaError_t cudaDrawLine( T* image, size_t width, size_t height,
  * @ingroup drawing
  */
 cudaError_t cudaDrawRect( void* input, void* output, size_t width, size_t height, imageFormat format, 
-					 int left, int top, int right, int bottom, const float4& color );
+					 int left, int top, int right, int bottom, const float4& color, int lineWidth=0 );
 
 /**
  * cudaDrawRect
@@ -162,9 +162,9 @@ cudaError_t cudaDrawRect( void* input, void* output, size_t width, size_t height
  */
 template<typename T> 
 cudaError_t cudaDrawRect( T* input, T* output, size_t width, size_t height, 
-				 	 int left, int top, int right, int bottom, const float4& color )	
+				 	 int left, int top, int right, int bottom, const float4& color, int lineWidth=0 )	
 { 
-	return cudaDrawRect(input, output, width, height, imageFormatFromType<T>(), left, top, right, bottom, color); 
+	return cudaDrawRect(input, output, width, height, imageFormatFromType<T>(), left, top, right, bottom, color, lineWidth); 
 }
 
 /**
@@ -172,9 +172,9 @@ cudaError_t cudaDrawRect( T* input, T* output, size_t width, size_t height,
  * @ingroup drawing
  */
 cudaError_t cudaDrawRect( void* image, size_t width, size_t height, imageFormat format, 
-					 int left, int top, int right, int bottom, const float4& color )
+					 int left, int top, int right, int bottom, const float4& color, int lineWidth=0 )
 {
-	return cudaDrawRect(image, image, width, height, format, left, top, right, bottom, color);
+	return cudaDrawRect(image, image, width, height, format, left, top, right, bottom, color, lineWidth);
 }
 
 /**
@@ -183,9 +183,9 @@ cudaError_t cudaDrawRect( void* image, size_t width, size_t height, imageFormat 
  */
 template<typename T> 
 cudaError_t cudaDrawRect( T* image, size_t width, size_t height, 
-				 	 int left, int top, int right, int bottom, const float4& color )	
+				 	 int left, int top, int right, int bottom, const float4& color, int lineWidth=0 )	
 { 
-	return cudaDrawRect(image, image, width, height, imageFormatFromType<T>(), left, top, right, bottom, color); 
+	return cudaDrawRect(image, image, width, height, imageFormatFromType<T>(), left, top, right, bottom, color, lineWidth); 
 }
 
 #endif
