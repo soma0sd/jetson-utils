@@ -270,7 +270,7 @@ __global__ void gpuDrawRect( T* img, int imgWidth, int imgHeight, int x0, int y0
 		return;
 
 	const int idx = y * imgWidth + x;
-	if(lineWidth <=0 || x < ix || y < iy || x > fx || y > fy)
+	if(lineWidth <=0 || x < ix || y < iy || x >= fx || y >= fy)
 	{
 		img[idx] = cudaAlphaBlend(img[idx], color);
 	}
