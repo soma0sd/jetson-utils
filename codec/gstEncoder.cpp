@@ -654,7 +654,7 @@ void gstEncoder::Close()
 	if( eos_result != 0 )
 		LogError(LOG_GSTREAMER "gstEncoder -- failed sending appsrc EOS (result %u)\n", eos_result);
 
-	sleep(1);
+	// sleep(1);
 
 	// stop pipeline
 	LogInfo(LOG_GSTREAMER "gstEncoder -- transitioning pipeline to GST_STATE_NULL\n");
@@ -664,7 +664,7 @@ void gstEncoder::Close()
 	if( result != GST_STATE_CHANGE_SUCCESS )
 		LogError(LOG_GSTREAMER "gstEncoder -- failed to set pipeline state to NULL (error %u)\n", result);
 
-	sleep(1);
+	// sleep(1);
 	checkMsgBus();	
 	mStreaming = false;
 	LogInfo(LOG_GSTREAMER "gstEncoder -- pipeline stopped\n");
